@@ -48,7 +48,7 @@ router.post('/chat', async (req, res) => {
       data: {
         response,
         timestamp: new Date().toISOString(),
-        model: 'claude-3-5-sonnet',
+        model: 'claude-sonnet-4-20250514',
         context: context || null
       }
     });
