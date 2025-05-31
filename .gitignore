@@ -6,3 +6,6 @@ node_modules/
 
 # Lock files (possono causare conflitti)
 package-lock.json
+
+# Vercel files
+.vercel

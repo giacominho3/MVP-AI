@@ -1,10 +1,10 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "backend/server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node backend/server.js",
+    "dev": "vercel dev"
   },
   "keywords": ["ai", "business", "automation", "claude"],
   "author": "Virgo & Devxx",
@@ -18,7 +18,9 @@
     "express-rate-limit": "^7.5.0",
     "helmet": "^8.1.0",
     "joi": "^17.13.3",
-    "morgan": "^1.10.0",
-    "nodemon": "^3.1.10"
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "vercel": "^37.4.0"
   }
 }
