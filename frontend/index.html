@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Business Assistant - MVP Real</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 900px;
+            width: 100%;
+            height: 700px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-info h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header-info p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.1);
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff6b6b;
+        }
+
+        .status-dot.connected {
+            background: #51cf66;
+        }
+
+        .chat-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 85%;
+            word-wrap: break-word;
+        }
+
+        .user-message {
+            background: #667eea;
+            color: white;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .ai-message {
+            background: white;
+            border: 1px solid #e1e5e9;
+            margin-right: auto;
+        }
+
+        .ai-message h3 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .message-meta {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        .input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e1e5e9;
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-field {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .input-field:focus {
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: transform 0.2s;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .typing-indicator {
+            display: none;
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-radius: 12px;
+            max-width: 80%;
+            margin-right: auto;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dots div {
+            width: 8px;
+            height: 8px;
+            background: #667eea;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dots div:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots div:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .error-message {
+            background: #ffe6e6;
+            border: 1px solid #ff9999;
+            color: #cc0000;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .control-panel {
+            background: #f8f9fa;
+            border-bottom: 1px solid #e1e5e9;
+            padding: 15px 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .api-info {
+            background: #e3f2fd;
+            border: 1px solid #90caf9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .api-info h3 {
+            color: #1976d2;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-info">
+                <h1>🤖 AI Business Assistant</h1>
+                <p>Connesso al backend reale con Claude API</p>
+            </div>
+            <div class="connection-status">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">Connecting...</span>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <button class="control-btn" onclick="testConnection()">🔄 Test API</button>
+            <button class="control-btn" onclick="clearChat()">🗑️ Clear Chat</button>
+            <button class="control-btn" onclick="showHelp()">❓ Help</button>
+            <button class="control-btn" onclick="toggleDebug()">🐛 Debug</button>
+        </div>
+
+        <div class="chat-area" id="chatArea">
+            <div class="api-info" id="apiInfo">
+                <h3>🚀 Sistema Pronto!</h3>
+                <p>Backend Node.js connesso a Claude API. Prova questi comandi:</p>
+                <ul style="margin-top: 8px; margin-left: 20px;">
+                    <li><strong>"Analizza questi dati vendite"</strong> - Test analisi dati</li>
+                    <li><strong>"Aiutami con Google Sheets"</strong> - Simulazione fogli</li>
+                    <li><strong>"Crea report mensile"</strong> - Generazione report</li>
+                    <li><strong>"Debug mode"</strong> - Mostra info tecniche</li>
+                </ul>
+            </div>
+
+            <div class="message ai-message">
+                <strong>👋 Assistente AI Pronto!</strong><br>
+                Ora sono connesso al <strong>backend reale</strong> con Claude API.<br><br>
+                ✅ <strong>Cosa posso fare ora:</strong><br>
+                🔍 Analizzare dati reali con Claude<br>
+                📊 Processare richieste complesse<br>
+                🔄 Mantenere contesto conversazione<br>
+                ⚡ Rispondere con AI vera (non simulata)<br>
+                <br>
+                <em>Fai una domanda per testare il sistema!</em>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dots">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <input 
+                type="text" 
+                class="input-field" 
+                id="messageInput" 
+                placeholder="Scrivi qui la tua richiesta al sistema AI..."
+                onkeypress="handleKeyPress(event)"
+            >
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                Invia
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = 'http://localhost:3001/api';
+        let conversationHistory = [];
+        let debugMode = false;
+        let isConnected = false;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            testConnection();
+            document.getElementById('messageInput').focus();
+        });
+
+        // Connection test
+        async function testConnection() {
+            try {
+                updateConnectionStatus('connecting');
+                
+                const response = await fetch(`${API_BASE_URL}/ai/test`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    updateConnectionStatus('connected');
+                    isConnected = true;
+                    addMessage('system', '✅ Connessione al backend stabilita con successo!');
+                } else {
+                    throw new Error(data.message || 'Connection failed');
+                }
+            } catch (error) {
+                updateConnectionStatus('disconnected');
+                isConnected = false;
+                addMessage('error', `❌ Errore connessione: ${error.message}`);
+                console.error('Connection test failed:', error);
+            }
+        }
+
+        function updateConnectionStatus(status) {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            
+            switch(status) {
+                case 'connected':
+                    statusDot.classList.add('connected');
+                    statusText.textContent = 'Connected';
+                    break;
+                case 'connecting':
+                    statusDot.classList.remove('connected');
+                    statusText.textContent = 'Connecting...';
+                    break;
+                case 'disconnected':
+                    statusDot.classList.remove('connected');
+                    statusText.textContent = 'Disconnected';
+                    break;
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            if (!isConnected) {
+                addMessage('error', '❌ Non connesso al backend. Prova a testare la connessione.');
+                return;
+            }
+            
+            // Add user message
+            addMessage('user', message);
+            input.value = '';
+            
+            // Show typing indicator
+            showTyping();
+            
+            try {
+                console.log('🚀 Sending message:', message);
+                
+                // Send to real backend
+                const response = await fetch(`${API_BASE_URL}/ai/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        context: debugMode ? { debug: true } : null
+                    })
+                });
+                
+                console.log('📨 Response status:', response.status);
+                
+                const responseText = await response.text();
+                console.log('📄 Raw response:', responseText);
+                
+                hideTyping();
+                
+                // Try to parse as JSON
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (e) {
+                    console.error('JSON parse error:', e);
+                    addMessage('error', `❌ Errore parsing: ${responseText.substring(0, 200)}...`);
+                    return;
+                }
+                
+                if (response.ok && (data.status === 'success' || data.response)) {
+                    // Handle both new and old response formats
+                    const aiResponse = data.data?.response || data.response || data;
+                    addMessage('ai', aiResponse, data.data || data);
+                } else {
+                    // Show error with details
+                    console.error('API Error:', data);
+                    addMessage('error', `❌ Errore: ${data.message || data.error || 'Errore sconosciuto'}`);
+                    
+                    if (debugMode) {
+                        addMessage('error', `Debug: ${JSON.stringify(data, null, 2)}`);
+                    }
+                }
+                
+            } catch (error) {
+                hideTyping();
+                addMessage('error', `❌ Errore di rete: ${error.message}`);
+                console.error('Send message error:', error);
+            }
+        }
+
+        function addMessage(type, content, metadata = null) {
+            const chatArea = document.getElementById('chatArea');
+            const messageDiv = document.createElement('div');
+            
+            if (type === 'error') {
+                messageDiv.className = 'error-message';
+                messageDiv.innerHTML = content;
+            } else if (type === 'system') {
+                messageDiv.className = 'message ai-message';
+                messageDiv.innerHTML = `<strong>🔧 Sistema:</strong><br>${content}`;
+            } else {
+                messageDiv.className = `message ${type}-message`;
+                
+                if (type === 'ai') {
+                    // Parse markdown-like formatting
+                    let formattedContent = content
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                        .replace(/\n/g, '<br>');
+                    
+                    messageDiv.innerHTML = formattedContent;
+                    
+                    // Add metadata if debug mode
+                    if (debugMode && metadata) {
+                        const metaDiv = document.createElement('div');
+                        metaDiv.className = 'message-meta';
+                        metaDiv.innerHTML = `
+                            Model: ${metadata.model || 'N/A'} | 
+                            Time: ${new Date(metadata.timestamp).toLocaleTimeString()}
+                        `;
+                        messageDiv.appendChild(metaDiv);
+                    }
+                } else {
+                    messageDiv.textContent = content;
+                }
+            }
+            
+            chatArea.appendChild(messageDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+            
+            // Save to history
+            conversationHistory.push({
+                type, 
+                content, 
+                timestamp: new Date(),
+                metadata
+            });
+        }
+
+        function showTyping() {
+            document.getElementById('typingIndicator').style.display = 'block';
+            document.getElementById('chatArea').scrollTop = document.getElementById('chatArea').scrollHeight;
+        }
+
+        function hideTyping() {
+            document.getElementById('typingIndicator').style.display = 'none';
+        }
+
+        function clearChat() {
+            const chatArea = document.getElementById('chatArea');
+            const messages = chatArea.querySelectorAll('.message, .error-message');
+            messages.forEach(msg => msg.remove());
+            conversationHistory = [];
+            addMessage('system', '🗑️ Chat pulita. Pronto per nuove conversazioni!');
+        }
+
+        function showHelp() {
+            const helpContent = `
+                <strong>🎯 Comandi Disponibili:</strong><br><br>
+                <strong>📊 Analisi Dati:</strong><br>
+                • "Analizza questi dati: [JSON/testo]"<br>
+                • "Crea report vendite"<br>
+                • "Calcola trend mensile"<br><br>
+                <strong>📋 Google Sheets:</strong><br>
+                • "Aiuta con Google Sheets"<br>
+                • "Formule per inventario"<br>
+                • "Automatizza fogli"<br><br>
+                <strong>🔧 Sistema:</strong><br>
+                • "Test API" - Verifica connessione<br>
+                • "Debug mode" - Mostra info tecniche<br>
+                • "Clear chat" - Pulisci conversazione
+            `;
+            addMessage('ai', helpContent);
+        }
+
+        function toggleDebug() {
+            debugMode = !debugMode;
+            addMessage('system', `🐛 Debug mode: ${debugMode ? 'ON' : 'OFF'}`);
+            
+            if (debugMode) {
+                addMessage('system', `
+                    📊 <strong>Debug Info:</strong><br>
+                    • API Base: ${API_BASE_URL}<br>
+                    • Connected: ${isConnected}<br>
+                    • Messages: ${conversationHistory.length}<br>
+                    • Browser: ${navigator.userAgent.split(' ')[0]}
+                `);
+            }
+        }
+
+        // Quick test functions for development
+        window.testDataAnalysis = async function() {
+            const testData = {
+                vendite: [
+                    {mese: "Gen", importo: 15000},
+                    {mese: "Feb", importo: 18000},
+                    {mese: "Mar", importo: 22000}
+                ]
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/ai/analyze`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        data: testData,
+                        analysisType: 'sales'
+                    })
+                });
+                
+                const result = await response.json();
+                console.log('Data analysis result:', result);
+                
+                if (result.status === 'success') {
+                    addMessage('ai', `📊 <strong>Analisi Dati Completata:</strong><br><br>${result.data.analysis}`);
+                }
+            } catch (error) {
+                console.error('Data analysis test failed:', error);
+            }
+        };
+    </script>
+</body>
+</html>

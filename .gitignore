@@ -1,0 +1,8 @@
+# Environment variables (contiene API keys Claude)
+.env
+
+# Dependencies
+node_modules/
+
+# Lock files (possono causare conflitti)
+package-lock.json
